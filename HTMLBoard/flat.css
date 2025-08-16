@@ -1,0 +1,344 @@
+/* credits given to www.postermywall.com/ for the wooden background */
+:root {
+  --sq-size: 50px;
+  --background: blanchedalmond;
+  --grid: center/100% no-repeat url('utils/board.svg');
+  --lighting: center/100% no-repeat url("utils/board-lighting.svg");
+  --end-mark: center/100% url("utils/mark-end.svg") no-repeat;
+  --start-mark: center/50% url("utils/mark-start.svg") no-repeat;
+  --semilegal: url("utils/mark-targetable.svg");
+  --black-view: 0;
+  --font: fangsong, "仿宋", serif;
+}
+
+#board.whiteoak { --background: url("utils/whiteoak.jpg"); }
+#board.darkoak { --background: url("utils/walnut.jpg"); }
+#board.darkoak .team-2 { color: darkgoldenrod; }
+
+#pieces.xingkai { --font: xingkai; }
+#pieces.lishu { --font: lishu; }
+#pieces.xinwei { --font: xinwei; }
+#pieces.yankai { --font: yankai; }
+#pieces.western { --font: western; }
+
+@font-face {
+  font-family: "xingkai";
+  src: url('utils/copyright-fonts/FZXINGKAI.TTF');
+}
+
+@font-face {
+  font-family: "lishu";
+  src: url('utils/copyright-fonts/FZLBSLISHU.TTF');
+}
+
+@font-face {
+  font-family: "xinwei";
+  src: url("utils/copyright-fonts/FZWEIBEI.TTF");
+}
+
+@font-face {
+  font-family: "yankai";
+  src: url('utils/copyright-fonts/HYYANKAIW.ttf');
+}
+
+@font-face {
+  font-family: "western";
+  src: url('utils/icomoon.ttf');
+}
+
+#board {
+  width: calc(1.12 * 9 * var(--sq-size));
+  height: calc(1.12 * 10 * var(--sq-size));
+  background: center/contain var(--background);
+  border-radius: calc(0.1 * var(--sq-size));
+  box-shadow: 7px 7px 5px burlywood;
+  border: 3px ridge burlywood;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+#board.blackView {
+  --black-view: 1;
+}
+
+/* places element in the middle and allowing stacking */
+#board > #squares, #board::before {
+  width: calc(9 * var(--sq-size));
+  height: calc(10 * var(--sq-size));
+  grid-area: 1 / 1;
+}
+
+#board::before {
+  content: "";
+  width: calc(9 * var(--sq-size));
+  height: calc(10.8 * var(--sq-size));
+  background: var(--grid), var(--lighting);
+  transform: rotate(calc(var(--black-view) * 180deg));
+}
+
+#squares {
+  display: grid;
+  grid: repeat(10, var(--sq-size)) / repeat(9, var(--sq-size));
+  z-index: 1;
+  transform: rotate(calc(var(--black-view) * 180deg));
+  user-select: none;
+}
+
+#squares > div {
+  width: var(--sq-size);
+  height: var(--sq-size);
+}
+
+#squares > div.endMark {
+  background: var(--end-mark);
+}
+
+#squares > div.startMark {
+  background: var(--start-mark);
+}
+
+#squares > div.targetable::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: center/100% var(--semilegal);
+}
+
+#squares > div.targetable:hover, #squares > div.targetable.dragin {
+  background-color: rgba(87, 128, 0, 0.2);;
+}
+
+#squares > div.nontargetable:hover, #squares > div.nontargetable.dragin {
+  background-color: rgba(128, 0, 49, 0.2);
+}
+
+#squares > div.warning {
+  animation: 1s warning ease-in-out;
+}
+
+@keyframes warning {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgb(238, 0, 127);
+  }
+}
+
+#pieces {
+  z-index: 2;
+  /* lets the pieces in it align based on this container */
+  position: absolute;
+  top: 30px;
+  left: 27px;
+}
+
+#pieces > div {
+  width: 50px;
+  height: 50px;
+  font-size: 35px;
+  background: var(--background);
+  border-radius: 50%;
+  border: 3px chocolate solid;
+  box-sizing: border-box;
+  transform: translate(calc(var(--left, 0) * var(--sq-size)), calc(var(--top, 0) * var(--sq-size)))
+      scale(0.9);
+  transition: top 0.2s, left 0.2s, filter 0.3s, transform 0.3s;
+  box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.6);
+  font-family: var(--font);
+  user-select: none;
+  position: absolute;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#pieces > div.team-1 {color: red;}
+#pieces > div.team-2 {color: black;}
+#pieces > div.team-3 {color: green;}
+
+/*
+  How the positions are marked (independent from perspective):
+      ９車馬象士將士象馬車    ０俥傌相仕帥仕相傌俥
+      ８　　　　　　　　　    １　　　　　　　　　
+      ７　砲　　　　　砲　    ２　炮　　　　　炮　
+      ６卒　卒　卒　卒　卒    ３兵　兵　兵　兵　兵
+      ５　　　　　　　　　    ４　　　　　　　　　
+      ４　　　　　　　　　    ５　　　　　　　　　
+      ３兵　兵　兵　兵　兵    ６卒　卒　卒　卒　卒
+      ２　炮　　　　　炮　    ７　砲　　　　　砲　
+      １　　　　　　　　　    ８　　　　　　　　　
+      ０俥傌相仕帥仕相傌俥    ９車馬象士將士象馬車
+      　ＡＢＣＤＥＦＧＨＩ    　ＩＨＧＦＥＤＣＢＡ
+      when --black-view=0   when --black-view=1
+  calc((N + var(--black-view) * (9 - 2 * N)): describes how many squares are to the left/top.
+    when --black-view=0: this equals N
+    when --black-view=1: this equals 9-N
+*/
+#pieces > div[data-row="9"] { --top: calc(0 + var(--black-view) * 9); }
+#pieces > div[data-row="8"] { --top: calc(1 + var(--black-view) * 7); }
+#pieces > div[data-row="7"] { --top: calc(2 + var(--black-view) * 5); }
+#pieces > div[data-row="6"] { --top: calc(3 + var(--black-view) * 3); }
+#pieces > div[data-row="5"] { --top: calc(4 + var(--black-view) * 1); }
+#pieces > div[data-row="4"] { --top: calc(5 - var(--black-view) * 1); }
+#pieces > div[data-row="3"] { --top: calc(6 - var(--black-view) * 3); }
+#pieces > div[data-row="2"] { --top: calc(7 - var(--black-view) * 5); }
+#pieces > div[data-row="1"] { --top: calc(8 - var(--black-view) * 7); }
+#pieces > div[data-row="0"] { --top: calc(9 - var(--black-view) * 9); }
+
+#pieces > div[data-col="A"] { --left: calc(0 + var(--black-view) * 8); }
+#pieces > div[data-col="B"] { --left: calc(1 + var(--black-view) * 6); }
+#pieces > div[data-col="C"] { --left: calc(2 + var(--black-view) * 4); }
+#pieces > div[data-col="D"] { --left: calc(3 + var(--black-view) * 2); }
+#pieces > div[data-col="E"] { --left: calc(4 + var(--black-view) * 0); }
+#pieces > div[data-col="F"] { --left: calc(5 - var(--black-view) * 2); }
+#pieces > div[data-col="G"] { --left: calc(6 - var(--black-view) * 4); }
+#pieces > div[data-col="H"] { --left: calc(7 - var(--black-view) * 6); }
+#pieces > div[data-col="I"] { --left: calc(8 - var(--black-view) * 8); }
+
+#pieces > div.selectable:hover {
+  filter: brightness(1.1);
+}
+
+#pieces > div.targetable::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: center/120% var(--semilegal);
+}
+
+#pieces > div.failed {
+  filter: brightness(0.8);
+}
+
+#pieces > div.fastMove {
+  transition: top 0.05s ease-in-out, left 0.05s ease-in-out;
+}
+
+#pieces > div.selectable {
+  cursor: pointer;
+}
+
+#pieces > div.selected {
+  box-shadow: 15px 15px 9px rgba(0, 0, 0, 0.4);
+  transform: translate(calc(var(--left, 0) * var(--sq-size)), calc(var(--top, 0) * var(--sq-size)))
+      scale(0.95) rotateX(20deg) translateY(-7px);
+  filter: drop-shadow(0px 0px 10px white);
+}
+
+/* combination filter needs to be specified or it would be overwritten */
+#pieces > div.selectable.selected:hover {
+  filter: brightness(1.1) drop-shadow(0px 0px 10px white);
+}
+
+#pieces > div.moving {
+  transform: translate(calc(var(--left, 0) * var(--sq-size)), calc(var(--top, 0) * var(--sq-size)))
+      scale(1.1);
+  z-index: 3;
+}
+
+#captured {
+  display: none;
+}
+
+#effects {
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+}
+
+#effects > section {
+  position: relative;
+}
+
+#effects > section.inactive {
+  display: none;
+  animation: none;
+}
+
+#effects > section img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  animation: 1s ease-out;
+}
+
+#capture, #check {
+  width: 112px;
+  height: 112px;
+}
+
+#capture img:first-child { animation-name: diffuse; }
+#capture img:not(:first-child) { animation-name: char-drop; }
+
+#check img:not(:first-child) { width: 60%; height: 60%; }
+
+#check img:nth-child(2) { left: -2%; top: -2%; }
+#check img:nth-child(3) { left: 42%; top: 42%; }
+
+#check img:first-child { animation-name: diffuse; }
+#check img:not(:first-child) { animation-name: char-drop; }
+
+#mate {
+  width: 160px;
+  height: 160px;
+}
+
+#mate img:not(:first-child) { width: 50%; height: 50%; }
+
+#mate img:nth-child(2) { top: 15%; left: 0%; }
+#mate img:nth-child(3) { top: 35%; left: 40%; }
+
+#effects > #mate img { animation-duration: 1.5s, 1.5s; }
+#mate img:first-child { animation-name: diffuse; transform: scale(1.8); }
+#mate img:nth-child(2) { animation-name: slide-left, char-drop; }
+#mate img:nth-child(3) { animation-name: slide-right, char-drop; }
+
+@keyframes char-drop {
+  0% {
+    transform: scale(3);
+    filter: blur(5px);
+  }
+  20%, 80% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    transform: scale(1.5);
+    filter: blur(15px);
+  }
+}
+
+@keyframes diffuse {
+  0% {
+    transform: scale(0.4);
+    filter: blur(20px);
+  }
+  20%, 80% {
+    transform: scale(1);
+    filter: blur(0px);
+    opacity: 1;
+  }
+  100% {
+    filter: blur(10px);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-left {
+  100% {
+    left: -6%;
+  }
+}
+
+@keyframes slide-right {
+  100% {
+    left: 46%;
+  }
+}

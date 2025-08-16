@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橡木风格象棋计时器</title>
+    <script type="module" src="./flat.js"></script>
+    <link rel="stylesheet" href="flat.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f8f4e9 0%, #e7dfd2 100%);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #5a4a3a;
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            gap: 20px;
+        }
+
+        .left-space {
+            width: 560px;
+            height: 610px;
+            background: #d9c7b8;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #5a4a3a;
+            font-size: 18px;
+            border: 1px solid #c0a992;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dialog-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .dialog-overlay.hiding {
+            opacity: 0;
+        }
+
+        .dialog-box {
+            background: #fff9f0;
+            width: 70%;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 2px solid #c0a992;
+            text-align: center;
+            transform: scale(1);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .dialog-overlay.hiding .dialog-box {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        .dialog-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #5a4a3a;
+        }
+
+        .dialog-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #7a6a5a;
+            line-height: 1.5;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .dialog-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, #5a8f5a 0%, #7ab07a 100%);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #a64d4d 0%, #c27474 100%);
+        }
+
+        .dialog-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .right-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .container {
+            background: rgba(255, 253, 245, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            border: 1px solid #d1b38d;
+        }
+
+        .timers {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .timer {
+            text-align: center;
+        }
+
+        .timer-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #7a6a5a;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ede6d6 0%, #e0d5c0 100%);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            color: #5a4a3a;
+            border: 1px solid #c0a992;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-undo {
+            background: linear-gradient(135deg, #a68a64 0%, #c2a782 100%);
+        }
+
+        .btn-draw {
+            background: linear-gradient(135deg, #9c7e55 0%, #b89a71 100%);
+        }
+
+        .btn-resign {
+            background: linear-gradient(135deg, #8c6b4a 0%, #a58665 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 修改后的折叠菜单样式 */
+        .collapse {
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .collapse-header {
+            padding: 12px;
+            background: linear-gradient(135deg, #ede6d6 0%, #e0d5c0 100%);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: #5a4a3a;
+            border: 1px solid #c0a992;
+            border-bottom: none;
+            font-size: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .collapse-header:hover {
+            background: linear-gradient(135deg, #e0d5c0 0%, #d4c7b0 100%);
+        }
+
+        .collapse-content {
+            padding: 20px;
+            background: rgba(255, 253, 245, 0.95);
+            border-radius: 8px 8px 0 0;
+            display: none;
+            border: 1px solid #c0a992;
+            border-bottom: none;
+            position: relative;
+            z-index: 1;
+            margin-top: -10px;
+            padding-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .collapse.active .collapse-content {
+            display: block;
+        }
+
+        /* 设置选项样式 */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0d5c0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #5a4a3a;
+            flex: 1;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            min-width: 120px;
+            justify-content: flex-end;
+        }
+
+        /* 开关样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d1b38d;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #a68a64;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* 下拉选择框样式 */
+        .select-box {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #c0a992;
+            background-color: #fff9f0;
+            color: #5a4a3a;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        /* 范围滑块样式 */
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #d1b38d;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #a68a64;
+            cursor: pointer;
+            border: 2px solid #fff9f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+
+        .range-value {
+            margin-left: 10px;
+            font-size: 13px;
+            color: #5a4a3a;
+            min-width: 20px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="left-space">
+            <!-- 象棋棋盘将放置在这里 -->
+            <section id="game"></section>
+            <!-- 象棋棋盘区域 -->
+
+            <!-- 新增的对话框 -->
+            <div class="dialog-overlay">
+                <div class="dialog-box">
+                    <div class="dialog-title">请求确认</div>
+                    <div class="dialog-message">
+                        对方请求悔棋，是否同意？
+                    </div>
+                    <div class="dialog-buttons">
+                        <button class="dialog-btn btn-accept">接受</button>
+                        <button class="dialog-btn btn-reject">拒绝</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-container">
+            <div class="container">
+                <div class="buttons">
+                    <button class="btn btn-undo">悔棋</button>
+                    <button class="btn btn-draw">提和</button>
+                    <button class="btn btn-resign">认输</button>
+                </div>
+
+                <div class="timers">
+                    <div class="timer">
+                        <div class="timer-label">红方</div>
+                        <div class="timer-display">00:00</div>
+                    </div>
+                    <div class="timer">
+                        <div class="timer-label">黑方</div>
+                        <div class="timer-display">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 修改后的折叠菜单 -->
+            <div class="collapse">
+                <div class="collapse-content">
+                    <div class="setting-item">
+                        <span class="setting-label">音效开关</span>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">计时器样式</span>
+                        <div class="setting-control">
+                            <select class="select-box">
+                                <option>古典</option>
+                                <option>现代</option>
+                                <option>简约</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">动画速度</span>
+                        <div class="setting-control">
+                            <div class="range-container">
+                                <input type="range" min="1" max="10" value="5" class="range-slider" id="animationSpeed">
+                                <span class="range-value">5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">背景音乐</span>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">棋盘主题</span>
+                        <div class="setting-control">
+                            <select class="select-box">
+                                <option>橡木</option>
+                                <option>红木</option>
+                                <option>竹纹</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">音量大小</span>
+                        <div class="setting-control">
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="70" class="range-slider" id="volumeControl">
+                                <span class="range-value">70%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse-header">设置菜单 ▼</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 折叠菜单功能
+        document.querySelector('.collapse-header').addEventListener('click', function() {
+            const collapse = this.parentElement;
+            collapse.classList.toggle('active');
+            this.innerHTML = collapse.classList.contains('active') ? '设置菜单 ▲' : '设置菜单 ▼';
+        });
+
+        // 范围滑块值显示更新
+        document.getElementById('animationSpeed').addEventListener('input', function() {
+            this.nextElementSibling.textContent = this.value;
+        });
+
+        document.getElementById('volumeControl').addEventListener('input', function() {
+            this.nextElementSibling.textContent = this.value + '%';
+        });
+
+        // 对话框关闭动画
+        function closeDialog() {
+            const dialogOverlay = document.querySelector('.dialog-overlay');
+            dialogOverlay.classList.add('hiding');
+
+            // 动画结束后移除对话框
+            setTimeout(() => {
+                dialogOverlay.style.display = 'none';
+            }, 300); // 匹配CSS动画时间
+        }
+
+        // 绑定按钮点击事件
+        document.querySelector('.btn-accept').addEventListener('click', closeDialog);
+        document.querySelector('.btn-reject').addEventListener('click', closeDialog);
+    </script>
+</body>
+</html>

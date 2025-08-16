@@ -1,0 +1,16 @@
+fonts used:
+  [Downloaded from the desktop app 方正字库]
+  行楷xingkai：方正行楷_GBK
+  隶书lishu：方正刘炳森隶书 简繁
+  新巍xinwei：方正魏碑_GBK
+  [Found online]
+  颜楷yankai：汉仪颜楷W (from https://www.jb51.net/fonts/656459.html#downintro2)
+
+None of these fonts were uploaded to github. It seems, according to the copyright
+holders, that using those fonts in an app requires me to purchase a special
+permission. This is just a hobby project, and I don't want to be sued for font
+copyright infringement. As a result, the fonts will not work. You need to
+download the fonts file (.ttf) yourself.
+
+Later I might (or might not) design the pieces look on my own, and at that time
+they would be available online.
