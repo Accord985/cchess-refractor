@@ -166,6 +166,7 @@ class HTMLBoard {
     });
     piece.addEventListener('dragstart', (evt: MouseEvent) => {
       qs(".selected")?.classList.remove("selected");
+      this.removeTargets();
       this._startX = evt.clientX; this._startY = evt.clientY;
       let piece = evt.target as HTMLDivElement;
       this._dragging = piece;

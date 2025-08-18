@@ -1,4 +1,3 @@
-/* credits given to www.postermywall.com/ for the wooden background */
 :root {
   --sq-size: 50px;
   --background: blanchedalmond;
@@ -14,6 +13,8 @@
 #board.whiteoak { --background: url("utils/whiteoak.jpg"); }
 #board.darkoak { --background: url("utils/walnut.jpg"); }
 #board.darkoak .team-2 { color: darkgoldenrod; }
+#board.redwood { --background: url("utils/redwood.jpg"); }
+#board.redwood .team-2 { color: darkgoldenrod; }
 
 #pieces.xingkai { --font: xingkai; }
 #pieces.lishu { --font: lishu; }
